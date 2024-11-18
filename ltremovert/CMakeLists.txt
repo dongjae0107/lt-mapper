@@ -2,7 +2,8 @@ cmake_minimum_required(VERSION 2.8.3)
 project(removert)
 
 set(CMAKE_BUILD_TYPE "Release")
-set(CMAKE_CXX_STANDARD 17) # C++17 to use stdc++fs
+set(CMAKE_CXX_STANDARD 17) # C++17 to use stdc++fs\
+set(CMAKE_CUDA_STANDARD 11)
 # set(CMAKE_CXX_FLAGS_RELEASE "-O3 -Wall -g -pthread")
 
 find_package(catkin REQUIRED COMPONENTS
@@ -22,6 +23,9 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(OpenMP REQUIRED)
+if(OpenMP_CXX_FOUND)
+  target_link_libraries(${PROJECT_NAME} PRIVATE OpenMP::OpenMP_CXX)
+endif()
 find_package(PCL REQUIRED QUIET)
 find_package(OpenCV REQUIRED QUIET)
 # find_package(GTSAM REQUIRED QUIET)
@@ -81,6 +85,12 @@ add_executable( ${PROJECT_NAME}_removert src/removert_main.cpp
   src/RosParamServer.cpp
   src/Session.cpp
   src/Removerter.cpp
+  src/cuda_kernel.cu
+)
+
+set_target_properties(${PROJECT_NAME}_removert PROPERTIES 
+  CUDA_SEPARABLE_COMPILATION ON
+  CUDA_ARCHITECTURES 52
 )
 
 add_dependencies(${PROJECT_NAME}_removert ${catkin_EXPORTED_TARGETS})
@@ -90,7 +100,8 @@ target_link_libraries(${PROJECT_NAME}_removert
   ${PCL_LIBRARIES} 
   ${OpenCV_LIBRARIES}
   ${OpenMP_CXX_FLAGS}
+  ${CUDA_LIBRARIES}
   stdc++fs
 )
 
-
+target_include_directories(${PROJECT_NAME}_removert PRIVATE ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES})

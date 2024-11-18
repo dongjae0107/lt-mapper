@@ -2,6 +2,7 @@
 
 #include "removert/RosParamServer.h"
 #include "removert/Session.h"
+#include "removert/cuda_kernels.h"
 
 namespace ltremovert 
 {
